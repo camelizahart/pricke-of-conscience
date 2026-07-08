@@ -196,3 +196,8 @@ select {
 .variant-text {
     line-height: 1.5;
 }
+
+.line-mismatch {
+    color: #b33;
+    font-weight: bold;
+}
