@@ -368,6 +368,7 @@ chosenWitness.forEach(w => {
 
             resultBox.appendChild(col);
         });
+    }
 
     const backBtn = document.createElement("button");
     backBtn.textContent = "Go Back";
