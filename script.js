@@ -110,6 +110,23 @@ function getLineNumberFromRef(ref) {
     return match ? match[1] : "?";
 }
 
+// Builds the bolded label for a witness box.
+// If this witness's own line number differs from the base text's line number,
+// the "(Line X)" part gets wrapped in a red-flag span.
+function buildVariantLabel(witnessId, ref, baseLineNumber) {
+    if (!ref) {
+        return `${witnessLabel(witnessId)}`;
+    }
+    const ownLineNumber = getLineNumberFromRef(ref);
+    const lineText = `(Line ${ownLineNumber})`;
+
+    if (ownLineNumber !== baseLineNumber) {
+        return `${witnessLabel(witnessId)} <span class="line-mismatch">${lineText}</span>`;
+    } else {
+        return `${witnessLabel(witnessId)} ${lineText}`;
+    }
+}
+
 function witnessLabel(id) {
     return id;
 }
