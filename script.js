@@ -104,28 +104,47 @@ function getLineText(ref) {
     return el ? el.textContent.trim() : "[not found]";
 }
 
+// Returns ALL refs belonging to a witness for this canonical line
+// (usually just one, but sometimes two if a witness's poem splits differently)
+function getRefsForWitness(variants, witnessId) {
+    return variants.filter(v => v.startsWith("#" + witnessId + "-"));
+}
+
+// Combines text from multiple lines into one readable block
+function getCombinedLineText(refs) {
+    return refs.map(ref => getLineText(ref)).join(" / ");
+}
+
+// Builds "(Line 1)" or "(Line 1 & 2)" depending on how many lines this witness has here
+function getLineNumberLabel(refs) {
+    const numbers = refs.map(ref => getLineNumberFromRef(ref));
+    return numbers.join(" & ");
+}
+
 // Given a ref like "#MV5-L3", returns just "3"
 function getLineNumberFromRef(ref) {
     const match = ref.match(/-L(\d+)/);
     return match ? match[1] : "?";
 }
 
-// Builds the bolded label for a witness box.
-// If this witness's own line number differs from the base text's line number,
-// the "(Line X)" part gets wrapped in a red-flag span.
-function buildVariantLabel(witnessId, ref, baseLineNumber) {
-    if (!ref) {
+function buildVariantLabel(witnessId, refs, baseLineNumber) {
+    if (!refs || refs.length === 0) {
         return `${witnessLabel(witnessId)}`;
     }
-    const ownLineNumber = getLineNumberFromRef(ref);
-    const lineText = `(Line ${ownLineNumber})`;
 
-    if (ownLineNumber !== baseLineNumber) {
+    const lineText = `(Line ${getLineNumberLabel(refs)})`;
+
+    // Flag as a mismatch if ANY of this witness's lines differ from the base line number
+    const hasMismatch = refs.some(ref => getLineNumberFromRef(ref) !== baseLineNumber);
+
+    if (hasMismatch) {
         return `${witnessLabel(witnessId)} <span class="line-mismatch">${lineText}</span>`;
     } else {
         return `${witnessLabel(witnessId)} ${lineText}`;
     }
 }
+
+
 
 function witnessLabel(id) {
     return id;
@@ -308,16 +327,15 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
         `;
         resultBox.appendChild(baseCol);
 
-      // One column per witness the person checked
-        chosenWitness.forEach(w => {
-            const ref = variants.find(v => v.includes(w + "-"));
+chosenWitness.forEach(w => {
+            const refs = getRefsForWitness(variants, w);
             const col = document.createElement("div");
             col.className = "variant-column";
 
-            if (ref) {
+            if (refs.length > 0) {
                 col.innerHTML = `
-                    <div class="variant-label">${buildVariantLabel(w, ref, lineNumber)}</div>
-                    <div class="variant-text">${getLineText(ref)}</div>
+                    <div class="variant-label">${buildVariantLabel(w, refs, lineNumber)}</div>
+                    <div class="variant-text">${getCombinedLineText(refs)}</div>
                 `;
             } else {
                 col.innerHTML = `
@@ -329,17 +347,17 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
         });
 
     } else {
-        // "all" mode — show EVERY witness, even ones with no line here
-        ALL_WITNESSES.forEach(witnessId => {
-            const ref = variants.find(v => v.includes(witnessId + "-"));
+   
+      ALL_WITNESSES.forEach(witnessId => {
+            const refs = getRefsForWitness(variants, witnessId);
 
             const col = document.createElement("div");
             col.className = "variant-column";
 
-            if (ref) {
+            if (refs.length > 0) {
                 col.innerHTML = `
-                    <div class="variant-label">${buildVariantLabel(witnessId, ref, lineNumber)}</div>
-                    <div class="variant-text">${getLineText(ref)}</div>
+                    <div class="variant-label">${buildVariantLabel(witnessId, refs, lineNumber)}</div>
+                    <div class="variant-text">${getCombinedLineText(refs)}</div>
                 `;
             } else {
                 col.innerHTML = `
@@ -350,7 +368,6 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
 
             resultBox.appendChild(col);
         });
-    }
 
     const backBtn = document.createElement("button");
     backBtn.textContent = "Go Back";
