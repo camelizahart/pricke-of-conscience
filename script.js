@@ -308,7 +308,7 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
         `;
         resultBox.appendChild(baseCol);
 
-        // One column per witness the person checked
+      // One column per witness the person checked
         chosenWitness.forEach(w => {
             const ref = variants.find(v => v.includes(w + "-"));
             const col = document.createElement("div");
@@ -316,7 +316,7 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
 
             if (ref) {
                 col.innerHTML = `
-                    <div class="variant-label">${witnessLabel(w)} (Line ${getLineNumberFromRef(ref)})</div>
+                    <div class="variant-label">${buildVariantLabel(w, ref, lineNumber)}</div>
                     <div class="variant-text">${getLineText(ref)}</div>
                 `;
             } else {
@@ -338,7 +338,7 @@ function showComparison(wrapper, canonicalId, mode, chosenWitness) {
 
             if (ref) {
                 col.innerHTML = `
-                    <div class="variant-label">${witnessLabel(witnessId)} (Line ${getLineNumberFromRef(ref)})</div>
+                    <div class="variant-label">${buildVariantLabel(witnessId, ref, lineNumber)}</div>
                     <div class="variant-text">${getLineText(ref)}</div>
                 `;
             } else {
