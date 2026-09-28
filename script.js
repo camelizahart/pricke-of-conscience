@@ -1,5 +1,10 @@
 // ====== SETTINGS ======
-let BASE_WITNESS = "MV27";
+// ====== SETTINGS ======
+// Check the URL for a "base" parameter (e.g. ?base=MV5) to pre-select a witness.
+// Falls back to MV27 if none is given or the value isn't a real witness.
+const urlParams = new URLSearchParams(window.location.search);
+const requestedBase = urlParams.get("base");
+let BASE_WITNESS = "MV27"; // default, may get overridden below once ALL_WITNESSES exists
 const ALL_WITNESSES = ["MV27", "MV1", "MV2", "MV4", "MV5", "MV6", "MV7", "MV8", "MV9", "MV10", "MV11", "MV12", "MV13", "MV14", "MV15", "MV16", "MV17", "MV18", "MV19", "MV20", "MV21", "MV22", "MV23", "MV24", "MV25", "MV26", "MV28", "MV29", "MV30", "MV31", "MV32", "MV33", "MV34", "MV35", "MV36", "MV38", "MV39", "MV40", "MV41", "MV42", "MV43", "MV44", "MV45", "MV46", "MV48", "MV50", "MV51", "MV52", "MV53", "MV55", "MV56", "MV57", "MV58", "MV59", "MV60", "MV61", "MV62", "MV63", "MV64", "MV65", "MV66", "MV67", "MV68", "MV69", "MV70", "MV71", "MV72", "MV73", "MV74", "MV75", "MV77", "MV78", "MV81", "MV82", "MV83", "MV85", "MV86", "MV87", "MV88", "MV89", "MV90", "MV91", "MV93", "MV94", "MV96", "MV97"];
 
 let xmlDoc = null;
@@ -66,7 +71,13 @@ async function loadTEI() {
             return;
         }
 
-        buildAlignmentTable();
+               buildAlignmentTable();
+
+        // Now that ALL_WITNESSES is defined, apply the URL parameter if valid
+        if (requestedBase && ALL_WITNESSES.includes(requestedBase)) {
+            BASE_WITNESS = requestedBase;
+        }
+
         createBaseSelector();
         renderBaseLines();
 
